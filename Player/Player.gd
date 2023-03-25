@@ -8,15 +8,15 @@ var direction = 1
 
 export var gravity = Vector2(0,30)
 
-export var move_speed = 20
-export var max_move = 300
+export var move_speed = 100
+export var max_move = 1000
 
 export var jump_speed = 200
-export var max_jump = 1200
+export var max_jump = 4000
 
 export var leap_speed = 200
-export var max_leap = 1200
-
+export var max_leap = 2000
+var lives = 5
 var moving = false
 var is_jumping = false
 var double_jumped = false
@@ -27,12 +27,17 @@ func _physics_process(_delta):
 	velocity.x = clamp(velocity.x,-max_move,max_move)
 		
 	if should_direction_flip:
-		if direction < 0 and not $AnimatedSprite.flip_h: $AnimatedSprite.flip_h = true
-		if direction > 0 and $AnimatedSprite.flip_h: $AnimatedSprite.flip_h = false
+		if direction < 0 and not $AnimatedSprite.flip_h: 
+			$AnimatedSprite.flip_h = true
+			$Attack.cast_to.x = -1*abs($Attack.cast_to.x)
+		if direction > 0 and $AnimatedSprite.flip_h: 
+			$AnimatedSprite.flip_h = false
+			$Attack.cast_to.x = abs($Attack.cast_to.x)
 	
 	if is_on_floor():
 		double_jumped = false
-		set_wall_raycasts(true)
+		if Input.is_action_just_pressed("attack"):
+			SM.set_state("Attacking")
 
 func is_moving():
 	if Input.is_action_pressed("left") or Input.is_action_pressed("right"):
@@ -53,32 +58,21 @@ func set_animation(anim):
 	if $AnimatedSprite.frames.has_animation(anim): $AnimatedSprite.play(anim)
 	else: $AnimatedSprite.play()
 
-func is_on_floor():
-	var fl = $Floor.get_children()
-	for f in fl:
-		if f.is_colliding():
-			return true
-	return false
-
-func is_on_right_wall():
-	if $Wall/Right.is_colliding():
-		return true
-	return false
-
-func is_on_left_wall():
-	if $Wall/Right.is_colliding():
-		return true
-	return false
-
-func get_right_collider():
-	return $Wall/Right.get_collider()
-
-func get_left_collider():
-	return $Wall/Left.get_collider()
-	
-func set_wall_raycasts(is_enabled):
-	$Wall/Left.enabled = is_enabled
-	$Wall/Right.enabled = is_enabled
+func attack():
+	if $Attack.is_colliding():
+		var target = $Attack.get_collider()
+		if target.has_method("damage"):
+			target.damage()
+	if $Attack_low.is_colliding():
+		var target = $Attack_low.get_collider()
+		if target.has_method("damage"):
+			target.damage()
 
 func die():
 	queue_free()
+	Global.lives -= 1
+
+
+func _on_AnimatedSprite_animation_finished():
+	if $AnimatedSprite.animation == "Attacking":
+		SM.set_state("Idle")

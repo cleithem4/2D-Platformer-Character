@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Levels/Won.gd" type="Script" id=1]
+
+[node name="Won" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="Label" type="Label" parent="."]
+margin_left = 301.0
+margin_top = 291.0
+margin_right = 465.0
+margin_bottom = 305.0
+rect_scale = Vector2( 3, 3 )
+text = "Congratulations! You won!"
+
+[node name="Button" type="Button" parent="."]
+margin_left = 479.0
+margin_top = 406.0
+margin_right = 629.0
+margin_bottom = 466.0
+text = "Quit"
+
+[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
